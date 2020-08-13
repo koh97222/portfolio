@@ -106,7 +106,7 @@ export default {
       this.$axios
         .get('http://localhost:8082/connect')
         .then((res) => {
-          this.a = res.data.hello
+          this.a = res.data.Name
         })
         .catch((err) => {
           this.a = err
