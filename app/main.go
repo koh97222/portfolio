@@ -9,10 +9,15 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-// Sample DB疎通確認用構造体
-type Sample struct {
-	ID   int    `gorm:"column:id"`
-	Name string `gorm:"column:name"`
+// User ユーザ情報の構造体
+type User struct {
+	ID    int    `gorm:"column:id"`
+	Name  string `gorm:"column:name"`
+	Email string `gorm:"column:email"`
+	Year  int    `gorm:"column:year"`
+	Month int    `gorm:"column:month"`
+	Day   int    `gorm:"column:day"`
+	Sex   int    `gorm:"column:sex"`
 	gorm.Model
 }
 
@@ -33,10 +38,10 @@ func gormConnect() *gorm.DB {
 	return db
 }
 
-// getSampleInfo 疎通確認用メソッド
-func getSampleInfo() Sample {
+// registNewUser 疎通確認用メソッド
+func registNewUser() User {
 	db := gormConnect()
-	sample := Sample{}
+	sample := User{}
 	db.Where("id = ?", "1").Find(&sample)
 	defer db.Close()
 	return sample
@@ -47,8 +52,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/connect", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, getSampleInfo())
+	e.GET("/registUser", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, registNewUser())
 	})
 	e.Use(middleware.CORS())
 	e.Logger.Fatal(e.Start(":8082"))
