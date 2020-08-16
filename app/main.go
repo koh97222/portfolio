@@ -9,16 +9,38 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// 定数
+const (
+	SuccessCode = "00" // 処理成功時
+	FailedCode  = "80" // 処理失敗時
+)
+
 // User ユーザ情報の構造体
 type User struct {
-	ID    int    `gorm:"column:id"`
-	Name  string `gorm:"column:name"`
-	Email string `gorm:"column:email"`
-	Year  int    `gorm:"column:year"`
-	Month int    `gorm:"column:month"`
-	Day   int    `gorm:"column:day"`
-	Sex   int    `gorm:"column:sex"`
-	gorm.Model
+	UserID   string `gorm:"column:userId"`
+	Password string `gorm:"column:password"`
+	Name     string `gorm:"column:name"`
+	Email    string `gorm:"column:email"`
+	Year     int    `gorm:"column:year"`
+	Month    int    `gorm:"column:month"`
+	Day      int    `gorm:"column:day"`
+	Sex      string `gorm:"column:sex"`
+}
+
+// Response APIのレスポンス結果に対応する汎用的な構造体
+type Response struct {
+	ResultCode    string `json:"resultCode"`
+	ResultMessage string `json:"resultMessage"`
+	User
+}
+
+// Response構造体の初期化
+// 基本的に処理失敗時のみ、ResultCodeを変更するようにしたい。
+func initResponse() *Response {
+	r := new(Response)
+	r.ResultCode = SuccessCode
+	r.ResultMessage = ""
+	return r
 }
 
 // GormConnect Mysqlへ接続し、dbインスタンスを返却します。
@@ -38,13 +60,23 @@ func gormConnect() *gorm.DB {
 	return db
 }
 
-// registNewUser 疎通確認用メソッド
-func registNewUser() User {
+// registNewUser ユーザ情報を新規登録します。
+func registNewUser(u User) {
 	db := gormConnect()
-	sample := User{}
-	db.Where("id = ?", "1").Find(&sample)
+	db.Create(u)
 	defer db.Close()
-	return sample
+}
+
+// registNewUserHandler 新規ユーザ登録ハンドラ。
+func registNewUserHandler(c echo.Context) error {
+	r := initResponse()
+	user := new(User)
+	if err := c.Bind(user); err != nil {
+		return err
+	}
+	registNewUser(*user)
+	r.ResultMessage = "registerd"
+	return c.JSON(http.StatusOK, r)
 }
 
 func main() {
@@ -52,8 +84,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/registUser", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, registNewUser())
+	e.POST("/registUser", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, registNewUserHandler(c))
 	})
 	e.Use(middleware.CORS())
 	e.Logger.Fatal(e.Start(":8082"))
