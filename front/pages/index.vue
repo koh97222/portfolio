@@ -122,6 +122,16 @@
 </template>
 
 <script>
+const SUCCESSCODE = '00' // 処理成功コード
+const FAILEDCODE = '80' // 処理失敗コード
+
+const success = (d) => {
+  return d.data.response.resultCode === SUCCESSCODE
+}
+const fail = (d) => {
+  return d.data.response.resultCode === FAILEDCODE
+}
+// ユーザー入力初期状態
 const userInitData = {
   UserID: null,
   Password: null,
@@ -160,7 +170,7 @@ export default {
     },
     day() {
       /**
-       * isLeapYear うるう年がどうかを判定。
+       * isLeapYear うるう年がどうかを判定します。
        * 【うるう年の条件】
        * ・西暦年が4で割り切れる年はうるう年
        * ・ただし、西暦年が100で割り切れる年は平年（うるう年ではない）
@@ -177,7 +187,7 @@ export default {
         return year % 4 === 0
       }
 
-      // is30Days 月の日数が30日かどうかを判定。
+      // is30Days 月の日数が30日かどうかを判定します。
       const is30Days = (month) => {
         const list = [4, 6, 9, 11]
         return list.includes(month)
@@ -207,7 +217,7 @@ export default {
     isDayColumnDisabled() {
       return !(this.input.Year && this.input.Month)
     },
-    // isNewRegist 新規登録であるかどうかを判定。
+    // isNewRegist 新規登録であるかどうかを判定します。
     isNewRegist() {
       return this.mode === '新規登録'
     },
@@ -234,11 +244,46 @@ export default {
 
   methods: {
     /**
-     * userNewRegist ユーザーの新規登録を行う。
+     * userNewRegist ユーザーの新規登録を行います。
      * 登録OK→次画面へ遷移。
      * 登録NG→エラーメッセージを表示。
      */
     userNewRegist(input) {
+      // -- 実処理スタート --
+      if (!this.validationOk(input)) {
+        // eslint-disable-next-line no-console
+        console.log('input err')
+        return
+      }
+
+      // 登録処理
+      this.$axios
+        .post('http://localhost:8082/registUser', input)
+        .then((res) => {
+          console.log(res)
+          if (success(res)) {
+            console.log('success')
+          }
+          if (fail(res)) {
+            console.log(res.data.resultMessage)
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+    /**
+     * モーダルの表示・非表示を制御します。
+     */
+    showModal(mode) {
+      this.dialog = !this.dialog
+      this.mode = mode
+    },
+
+    /**
+     * validationOk ユーザ入力値のバリデーションチェックを行います。
+     */
+    validationOk(input) {
       // isAllInput 入力必須チェック
       const isAllInput = (input) => {
         let isValid = true
@@ -265,29 +310,8 @@ export default {
         return true
       }
 
-      // inputValid 入力された情報がすべて妥当か判断する関数。
-      const inputValid = () => {
-        return isAllInput(input) && validPassword(input) && validEmail(input)
-      }
-      // -- 実処理スタート --
-      if (!inputValid()) {
-        // eslint-disable-next-line no-console
-        console.log('input err')
-        return
-      }
-
-      // 登録処理
-      this.$axios
-        .post('http://localhost:8082/registUser', input)
-        .then(() => {})
-        .catch(() => {})
-    },
-    /**
-     * モーダルの表示を行う。
-     */
-    showModal(mode) {
-      this.dialog = !this.dialog
-      this.mode = mode
+      // すべてのバリデーションに引っかからない場合であれば、trueを返却します。
+      return isAllInput(input) && validPassword(input) && validEmail(input)
     },
   },
 }
