@@ -265,7 +265,6 @@ export default {
             console.log('success')
           }
           if (fail(res)) {
-            console.log(res.data.resultMessage)
           }
         })
         .catch((err) => {

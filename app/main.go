@@ -1,10 +1,11 @@
 package main
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -30,8 +31,9 @@ type User struct {
 
 // UserResponse ユーザ情報のレスポンス構造体
 type UserResponse struct {
-	Response Response `json:"response"`
-	User     *User    `json:"user"`
+	Result   sql.Result `json:"result"`
+	Response Response   `json:"response"`
+	User     *User      `json:"user"`
 }
 
 // Response APIの処理結果に対応する汎用的な構造体
@@ -40,8 +42,13 @@ type Response struct {
 	ResultMessage string `json:"resultMessage"`
 }
 
+// Cnt 件数カウント結果
+type Cnt struct {
+	Count int
+}
+
 // GormConnect Mysqlへ接続し、dbインスタンスを返却します。
-func gormConnect() *gorm.DB {
+func dbConnect() *sql.DB {
 	DBMS := "mysql"
 	USER := "docker"
 	PASS := "docker"
@@ -49,7 +56,8 @@ func gormConnect() *gorm.DB {
 	DBNAME := "portfolio_database"
 
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?parseTime=true"
-	db, err := gorm.Open(DBMS, CONNECT)
+	db, err := sql.Open(DBMS, CONNECT)
+	// db, err := gorm.Open(DBMS, CONNECT)
 
 	if err != nil {
 		panic(err.Error())
@@ -58,20 +66,38 @@ func gormConnect() *gorm.DB {
 }
 
 // registNewUser ユーザ情報を新規登録します。
-func registNewUser(u User) *User {
-	db := gormConnect()
-	db.Create(&u)
+func registNewUser(u User) sql.Result {
+
+	db := dbConnect()
+	query := "INSERT INTO users (userID,password,name,Email,Year,Month,Day,Sex) VALUES (?,?,?,?,?,?,?,?)"
+	result, err := db.Exec(query, u.UserID, u.Password, u.Name, u.Email, u.Year, u.Month, u.Day, u.Sex)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer db.Close()
-	return &u
+	return result
 }
 
 // isDuplicateUserID ユーザIDが既に登録されているかどうかを確認します。
 func isDuplicateUserID(u User) bool {
-	db := gormConnect()
-	user := User{}
-	isNotFound := db.Where("userID = ?", u.UserID).Find(&user).RecordNotFound()
+	db := dbConnect()
+	query := "SELECT count(*) FROM users WHERE userID = ?"
+
+	cnt, err := db.Query(query, u.UserID)
+	if err != nil {
+		panic(err.Error())
+	}
+	// userID検索結果件数
+	var Count Cnt
+	for cnt.Next() {
+		err := cnt.Scan(&Count.Count)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 	defer db.Close()
-	return !isNotFound
+	// ユーザIDが重複している場合、trueを返します。
+	return Count.Count != 0
 }
 
 // registNewUserHandler 新規ユーザ登録ハンドラ。
@@ -87,11 +113,12 @@ func registNewUserHandler(c echo.Context) error {
 		res.User = nil
 		res.Response.ResultCode = FailedCode
 		res.Response.ResultMessage = "user has not created because userID is already exist."
-		return c.JSON(http.StatusOK, user)
+		return c.JSON(http.StatusOK, res)
 	}
 	// ユーザ登録メソッド実行
-	user = registNewUser(*user)
+	result := registNewUser(*user)
 	res.User = user
+	res.Result = result
 	res.Response.ResultCode = SuccessCode
 	res.Response.ResultMessage = "user has created."
 
