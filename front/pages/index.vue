@@ -126,10 +126,10 @@ const SUCCESSCODE = '00' // 処理成功コード
 const FAILEDCODE = '80' // 処理失敗コード
 
 const success = (d) => {
-  return d.data.response.resultCode === SUCCESSCODE
+  return d.data.resultCode === SUCCESSCODE
 }
 const fail = (d) => {
-  return d.data.response.resultCode === FAILEDCODE
+  return d.data.resultCode === FAILEDCODE
 }
 // ユーザー入力初期状態
 const userInitData = {
