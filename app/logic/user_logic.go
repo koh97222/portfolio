@@ -16,7 +16,12 @@ func CreateNewUser(c echo.Context) (res *domain.Response, err error) {
 	}
 	// userIdの重複がないかどうかを確認します。
 	// 重複がない場合は、そのまま登録に進みます。
-	isDuplicated, err := repository.IsDuplicateUserID(*user)
+	isDuplicated, err := isDuplicateUserID(*user)
+	if err != nil {
+		res.Failed("An error occurred while checking for user duplicates.", nil)
+		return res, err
+	}
+	// ユーザID重複時
 	if isDuplicated {
 		res = res.Failed("user has not created because userID is already exist.", nil)
 		return res, err
@@ -29,4 +34,12 @@ func CreateNewUser(c echo.Context) (res *domain.Response, err error) {
 	}
 	res = res.Success("user has created.", *user)
 	return res, err
+}
+
+// isDuplicateUserID ユーザIDが既に登録されているかどうかを確認します。
+func isDuplicateUserID(u domain.User) (bool, error) {
+	cnt, err := repository.CountUser(u.UserID)
+
+	// ユーザIDが重複している場合、trueを返します。
+	return cnt != 0, err
 }

@@ -11,7 +11,9 @@
           <v-btn color="primary" outlined @click="showModal('ログイン')"
             >ログイン</v-btn
           >
-          <v-btn color="primary" outlined>お試しログイン</v-btn>
+          <v-btn color="primary" outlined @click="trialLogin()"
+            >お試しログイン</v-btn
+          >
         </div>
       </v-row>
     </v-flex>
@@ -111,9 +113,20 @@
           <v-btn color="blue darken-1" text @click="dialog = false"
             >閉じる</v-btn
           >
-          <v-btn color="blue darken-1" text @click="userNewRegist(input)">{{
-            mode
-          }}</v-btn>
+          <v-btn
+            v-if="isNewRegist"
+            color="blue darken-1"
+            text
+            @click="createNewUser(input, mode)"
+            >{{ mode }}</v-btn
+          >
+          <v-btn
+            v-if="!isNewRegist"
+            color="blue darken-1"
+            text
+            @click="login(input, mode)"
+            >{{ mode }}</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -130,6 +143,12 @@ const success = (d) => {
 }
 const fail = (d) => {
   return d.data.resultCode === FAILEDCODE
+}
+
+const URLs = {
+  login: 'http://localhost:8082/login',
+  createNewUser: 'http://localhost:8082/createNewUser',
+  trialLogin: 'http://localhost:8082/trialLogin',
 }
 // ユーザー入力初期状態
 const userInitData = {
@@ -244,13 +263,13 @@ export default {
 
   methods: {
     /**
-     * userNewRegist ユーザーの新規登録を行います。
+     * createNewUser ユーザーの新規登録を行います。
      * 登録OK→次画面へ遷移。
      * 登録NG→エラーメッセージを表示。
      */
-    userNewRegist(input) {
+    createNewUser(input, mode) {
       // -- 実処理スタート --
-      if (!this.validationOk(input)) {
+      if (!this.validationOk(input, mode)) {
         // eslint-disable-next-line no-console
         console.log('input err')
         return
@@ -258,7 +277,7 @@ export default {
 
       // 登録処理
       this.$axios
-        .post('http://localhost:8082/registUser', input)
+        .post(URLs.createNewUser, input)
         .then((res) => {
           console.log(res)
           if (success(res)) {
@@ -272,6 +291,63 @@ export default {
         })
     },
     /**
+     * ログインボタン押下時に発火。
+     * ログインOK→ユーザ情報を取得し、別画面へ遷移。
+     * ログインNG→ログイン失敗の旨をユーザに伝える。
+     */
+    login(input, mode) {
+      // -- 実処理スタート --
+      if (!this.validationOk(input, mode)) {
+        // eslint-disable-next-line no-console
+        console.log('input err')
+        return
+      }
+
+      const params = {
+        UserID: input.UserID,
+        Password: input.Password,
+      }
+
+      // ログイン処理
+      this.$axios
+        .post(URLs.login, params)
+        .then((res) => {
+          console.log(res)
+          if (success(res)) {
+            console.log('success')
+          }
+          if (fail(res)) {
+            console.log('failed')
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+    /**
+     * お試しログイン
+     * お試しユーザの情報を取得し、次画面へ遷移します。
+     */
+    trialLogin() {
+      // お試しログイン処理
+      this.$axios
+        .get(URLs.trialLogin)
+        .then((res) => {
+          console.log(res)
+          if (success(res)) {
+            console.log('success')
+          }
+          if (fail(res)) {
+            console.log('failed')
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+      // TODO:次画面へ遷移
+    },
+
+    /**
      * モーダルの表示・非表示を制御します。
      */
     showModal(mode) {
@@ -282,7 +358,7 @@ export default {
     /**
      * validationOk ユーザ入力値のバリデーションチェックを行います。
      */
-    validationOk(input) {
+    validationOk(input, mode) {
       // isAllInput 入力必須チェック
       const isAllInput = (input) => {
         let isValid = true
@@ -292,6 +368,9 @@ export default {
           }
         })
         return isValid
+      }
+      const isInputLoginInfo = (input) => {
+        return input.UserID && input.Password
       }
       // validPassword パスワードチェック
       const validPassword = (input) => {
@@ -309,8 +388,13 @@ export default {
         return true
       }
 
-      // すべてのバリデーションに引っかからない場合であれば、trueを返却します。
-      return isAllInput(input) && validPassword(input) && validEmail(input)
+      if (mode === '新規登録') {
+        // すべてのバリデーションに引っかからない場合であれば、trueを返却します。
+        return isAllInput(input) && validPassword(input) && validEmail(input)
+      }
+      if (mode === 'ログイン') {
+        return isInputLoginInfo(input)
+      }
     },
   },
 }

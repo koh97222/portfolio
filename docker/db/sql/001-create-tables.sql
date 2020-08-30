@@ -34,4 +34,4 @@ create table IF not exists `users`
     PRIMARY KEY (`id`)
 );
 ---- insert ----
-INSERT INTO samples values (1,'sample',CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP(),NULL);
+INSERT INTO users values (1,'trial_user','trial_password','trial','trial@abc.co.jp',1997,1,1,'男');

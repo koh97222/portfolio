@@ -5,6 +5,28 @@ import (
 	"app/infrastructure"
 )
 
+// CountUser ユーザの数を調べます。
+func CountUser(userID string) (int, error) {
+	db := infrastructure.DbConnect()
+	query := "SELECT count(*) FROM users WHERE userID = ?"
+
+	cnt, err := db.Query(query, userID)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// userID検索結果件数
+	var Count domain.Cnt
+	for cnt.Next() {
+		err := cnt.Scan(&Count.Count)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return Count.Count, err
+}
+
 // CreateNewUser ユーザ情報を新規登録します。
 func CreateNewUser(u domain.User) (domain.User, error) {
 
@@ -21,29 +43,4 @@ func CreateNewUser(u domain.User) (domain.User, error) {
 	id, _ := res.LastInsertId()
 	u.ID = int(id)
 	return u, err
-}
-
-// IsDuplicateUserID ユーザIDが既に登録されているかどうかを確認します。
-func IsDuplicateUserID(u domain.User) (bool, error) {
-
-	db := infrastructure.DbConnect()
-	query := "SELECT count(*) FROM users WHERE userID = ?"
-
-	cnt, err := db.Query(query, u.UserID)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer db.Close()
-
-	// userID検索結果件数
-	var Count domain.Cnt
-	for cnt.Next() {
-		err := cnt.Scan(&Count.Count)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	// ユーザIDが重複している場合、trueを返します。
-	return Count.Count != 0, err
 }

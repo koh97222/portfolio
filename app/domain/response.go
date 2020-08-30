@@ -22,7 +22,7 @@ func NewResponse() *Response {
 	}
 }
 
-// Success 処理成功時
+// Success 処理成功時に結果をセットします。
 func (r *Response) Success(msg string, contents interface{}) *Response {
 	return &Response{
 		ResultCode:    SuccessCode,
@@ -31,7 +31,7 @@ func (r *Response) Success(msg string, contents interface{}) *Response {
 	}
 }
 
-// Failed 処理失敗時
+// Failed 処理失敗時に結果をセットします。
 func (r *Response) Failed(msg string, contents interface{}) *Response {
 	return &Response{
 		ResultCode:    FailedCode,

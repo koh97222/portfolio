@@ -10,8 +10,9 @@ import (
 
 func main() {
 	e := echo.New()
-	// ユーザー新規登録API
-	e.POST("/registUser", controller.CreateNewUser)
+	e.POST("/createNewUser", controller.CreateNewUser) // ユーザー新規登録API
+	e.POST("/login", controller.Login)                 // ログインAPI
+	e.GET("/trialLogin", controller.TrialLogin)        // お試しログインAPI
 	e.Use(middleware.CORS())
 	e.Logger.Fatal(e.Start(":8082"))
 }
