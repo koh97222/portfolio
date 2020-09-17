@@ -1,22 +1,32 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
+  <!-- <v-layout column justify-center align-center> -->
+  <v-layout>
+    <v-row>
       <v-row class="top">
-        <div>
-          <h1>Foodience</h1>
-          <p>~Foodienceは、自炊する1人暮らしの方を応援する新しいSNSです~</p>
-          <v-btn color="primary" outlined @click="showModal('新規登録')"
-            >新規登録</v-btn
-          >
-          <v-btn color="primary" outlined @click="showModal('ログイン')"
-            >ログイン</v-btn
-          >
-          <v-btn color="primary" outlined @click="trialLogin()"
-            >お試しログイン</v-btn
-          >
-        </div>
+        <v-col cols="12" sm="6" md="6" xs="6">
+          <v-img
+            src="https://i.pinimg.com/736x/53/9e/e8/539ee80e48c4570e84d7646e21b14dd5.jpg"
+          ></v-img>
+        </v-col>
+        <v-col cols="12" sm="6" md="6" xs="6">
+          <v-layout justify-center align-center>
+            <div>
+              <h1>Foodience</h1>
+              <p>~Foodienceは、自炊する1人暮らしの方を応援する新しいSNSです~</p>
+              <v-btn color="primary" outlined @click="showModal('新規登録')"
+                >新規登録</v-btn
+              >
+              <v-btn color="primary" outlined @click="showModal('ログイン')"
+                >ログイン</v-btn
+              >
+              <v-btn color="primary" outlined @click="trialLogin()"
+                >お試しログイン</v-btn
+              >
+            </div>
+          </v-layout>
+        </v-col>
       </v-row>
-    </v-flex>
+    </v-row>
 
     <!-- ユーザー新規登録・ログインダイアログ -->
     <v-dialog v-model="dialog" persistent max-width="500px">
@@ -133,7 +143,11 @@
     <!-- -->
   </v-layout>
 </template>
-
+<style scoped>
+.top {
+  background-color: #f2f2f2;
+}
+</style>
 <script>
 const SUCCESSCODE = '00' // 処理成功コード
 const FAILEDCODE = '80' // 処理失敗コード
