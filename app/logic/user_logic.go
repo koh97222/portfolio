@@ -18,7 +18,7 @@ func CreateNewUser(c echo.Context) (res *domain.Response, err error) {
 	// 重複がない場合は、そのまま登録に進みます。
 	isDuplicated, err := isDuplicateUserID(*user)
 	if err != nil {
-		res.Failed("An error occurred while checking for user duplicates.", nil)
+		res = res.Failed("An error occurred while checking for user duplicates.", nil)
 		return res, err
 	}
 	// ユーザID重複時
