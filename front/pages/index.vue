@@ -38,6 +38,13 @@
           <v-container>
             <v-row>
               <v-col cols="12">
+                <div v-if="errMsg.length">
+                  <div v-for="err in errMsg" :key="err.idx">
+                    <v-alert dismissible dense outlined type="error">
+                      {{ err }}
+                    </v-alert>
+                  </div>
+                </div>
                 <v-text-field
                   v-model="input.UserID"
                   label="ID*"
@@ -272,6 +279,7 @@ export default {
     dialog: function () {
       // 入力情報をリセットする。
       this.input = JSON.parse(JSON.stringify(userInitData))
+      this.errMsg = []
     },
   },
 
@@ -298,6 +306,7 @@ export default {
             console.log('success')
           }
           if (fail(res)) {
+            this.errMsg.push(res.data.resultMessage)
           }
         })
         .catch((err) => {
@@ -310,7 +319,6 @@ export default {
      * ログインNG→ログイン失敗の旨をユーザに伝える。
      */
     login(input, mode) {
-      // -- 実処理スタート --
       if (!this.validationOk(input, mode)) {
         // eslint-disable-next-line no-console
         console.log('input err')
@@ -332,6 +340,7 @@ export default {
           }
           if (fail(res)) {
             console.log('failed')
+            this.errMsg.push(res.data.resultMessage)
           }
         })
         .catch((err) => {
@@ -353,6 +362,7 @@ export default {
           }
           if (fail(res)) {
             console.log('failed')
+            this.errMsg.push(res.data.resultMessage)
           }
         })
         .catch((err) => {
@@ -370,7 +380,9 @@ export default {
     },
 
     /**
-     * validationOk ユーザ入力値のバリデーションチェックを行います。
+     * validationOk
+     * ユーザ入力値のバリデーションチェックを行います。
+     * バリデーションエラー時はエラーメッセージを詰めます。
      */
     validationOk(input, mode) {
       // isAllInput 入力必須チェック
@@ -381,18 +393,28 @@ export default {
             isValid = false
           }
         })
+        if (!isValid) {
+          this.errMsg.push('内容をすべて入力してください。')
+        }
         return isValid
       }
       const isInputLoginInfo = (input) => {
-        return input.UserID && input.Password
+        const isInputOK = input.UserID && input.Password
+        if (!isInputOK) {
+          this.errMsg.push('ID、Passwordを入力してください。')
+        }
+        return isInputOK
       }
       // validPassword パスワードチェック
       const validPassword = (input) => {
         // TODO: 3種類8文字以上のパスワードが入力されているかチェックする。
-        if (input.Password && input.Password === input.ConfirmPassword) {
-          return true
+        const isInputOK =
+          input.Password && input.Password === input.ConfirmPassword
+        if (!isInputOK) {
+          this.errMsg.push('パスワードは3種類8文字以上で入力してください。')
         }
-        return false
+
+        return isInputOK
       }
 
       // validEmail メールアドレスチェック
