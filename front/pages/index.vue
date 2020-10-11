@@ -2,14 +2,10 @@
   <!-- <v-layout column justify-center align-center> -->
   <v-layout>
     <v-row>
-      <v-row class="top">
+      <v-row class="top" style="margin: 10px;">
+        <v-col cols="12" sm="6" md="6" xs="6"> </v-col>
         <v-col cols="12" sm="6" md="6" xs="6">
-          <v-img
-            src="https://i.pinimg.com/736x/53/9e/e8/539ee80e48c4570e84d7646e21b14dd5.jpg"
-          ></v-img>
-        </v-col>
-        <v-col cols="12" sm="6" md="6" xs="6">
-          <v-layout justify-center align-center>
+          <v-layout justify-center align-center mt-5 mb-5>
             <div>
               <h1>Foodience</h1>
               <p>~Foodienceは、自炊する1人暮らしの方を応援する新しいSNSです~</p>
@@ -25,6 +21,72 @@
             </div>
           </v-layout>
         </v-col>
+        <v-row class="contents mt-150">
+          <v-layout justify-center align-center
+            ><div>
+              <h1 style="text-align: center;">機能紹介</h1>
+              <v-row>
+                <div style="margin: 5px;">
+                  <v-card
+                    class="mx-auto my-12"
+                    elevation="2"
+                    outlined
+                    shaped
+                    tile
+                    max-width="374"
+                    style="height: 600px; width: 400px;"
+                  >
+                    <v-img
+                      height="250"
+                      src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+                    ></v-img>
+                    <v-card-title>
+                      レシピ投稿
+                    </v-card-title>
+                  </v-card>
+                </div>
+                <div style="margin: 5px;">
+                  <v-card
+                    class="mx-auto my-12"
+                    elevation="2"
+                    outlined
+                    shaped
+                    tile
+                    max-width="374"
+                    style="height: 600px; width: 400px;"
+                  >
+                    <v-img
+                      height="250"
+                      src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+                    ></v-img>
+                    <v-card-title>
+                      レシピ検索
+                    </v-card-title>
+                  </v-card>
+                </div>
+                <div style="margin: 5px;">
+                  <v-card
+                    class="mx-auto my-12"
+                    elevation="2"
+                    outlined
+                    shaped
+                    tile
+                    max-width="374"
+                    style="height: 600px; width: 400px;"
+                  >
+                    <v-img
+                      height="250"
+                      src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+                    ></v-img>
+                    <v-card-title>
+                      Foodiest ranking
+                    </v-card-title>
+                  </v-card>
+                </div>
+              </v-row>
+            </div>
+          </v-layout>
+        </v-row>
       </v-row>
     </v-row>
 
@@ -151,6 +213,9 @@
   </v-layout>
 </template>
 <style scoped>
+.mt-150 {
+  margin-top: 150px;
+}
 .top {
   background-color: #f2f2f2;
 }
